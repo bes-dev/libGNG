@@ -1,0 +1,4 @@
+libGNG
+======
+
+Growing Neural Gas
