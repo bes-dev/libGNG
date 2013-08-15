@@ -14,7 +14,7 @@ using namespace ng;
 int main(int argc, char* argv[])
 {
 	std::srand(std::time(0));
-	ng::GNG model(2, 0.2, 0.006, 0.5, 0.00005, 20, 10, 50, 0.03, true);
+	ng::GNG model(2, 0.3, 0.00003, 0.5, 0.0005, 20, 12, 100, 1.82, true);
 
 	ublas::vector<double> a(2);
 	ublas::vector<double> x1(2), x2(2);
@@ -25,19 +25,39 @@ int main(int argc, char* argv[])
 	model.init(x1, x2);
 
 	int sign = 1;
-	for(int i = 0; i < 10000; i++)
+	for(int i = 0; i < 40000; i++)
 	{
 		std::cout<<i<<"\n";
 		int rnd = std::rand()%3;
 		if(rnd == 0)
 		{
-			a(0) = 300 + std::rand()%40;
-			a(1) = 220 + std::rand()%40;
+			int w = std::rand()%2;
+			if(w)
+			{
+				a(0) = 300 + std::rand()%40;
+				a(1) = 220 + (std::rand()%2)*40;
+			}
+			else
+			{
+				a(0) = 300 + (std::rand()%2)*40;
+				a(1) = 220 + std::rand()%40;
+			}
 		}
 		else if(rnd == 1)
 		{
-			a(0) = 420 + std::rand()%40;
-			a(1) = 290 + std::rand()%40;
+			int w = std::rand()%2;
+			if(w)
+			{
+				a(0) = 420 + std::rand()%40;
+				a(1) = 290 + (std::rand()%2)*40;
+			}
+			else
+			{
+				a(0) = 420 + (std::rand()%2)*40;
+				a(1) = 290 + std::rand()%40;
+			}
+			//a(0) = 420 + std::rand()%40;
+			//a(1) = 290 + std::rand()%40;
 		}
 		else
 		{
@@ -45,8 +65,6 @@ int main(int argc, char* argv[])
 			a(1) = 120 + sign*std::sqrt(400-(a(0)-120)*(a(0)-120));
 			sign *= -1;
 		}
-		double x = a(0);
-		double y = a(1);
 		model.addSignal(a);
 		//cv::Mat img(480, 640, CV_32FC3);
 		//cv::rectangle(img, cv::Point(300, 220), cv::Point(340, 260), cv::Scalar(0, 255, 0));
