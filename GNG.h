@@ -13,6 +13,8 @@ namespace ng
 		double utility;
 		double error;
 		boost::numeric::ublas::vector<double> weight;
+		int class_id;
+		GNGVertexProperties():class_id(-1){}
 	};
 
 	struct GNGEdgeProperties
@@ -37,7 +39,9 @@ namespace ng
 		~GNG(){}
 		void addSignal(const boost::numeric::ublas::vector<double> &x);
 		void init(boost::numeric::ublas::vector<double> v1, boost::numeric::ublas::vector<double> v2);
+		void classify();
 		int getConnectedComponentsCount();
+		GNGGraph getGraph();
 		void draw(cv::Mat &image);
 	private:
 		int dim;
@@ -50,6 +54,7 @@ namespace ng
 		double k;
 		bool gngu;
 		GNGGraph graph;
+		int class_count;
 	};
 }
 

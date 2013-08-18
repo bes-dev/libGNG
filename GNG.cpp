@@ -14,7 +14,7 @@
 using namespace ng;
 using namespace boost::numeric;
 
-GNG::GNG(int dim, double eps_w, double eps_n, double alpha, double beta, int lambda, int age_max, int vertices_max, double k, bool gngu): dim(dim), eps_w(eps_w), eps_n(eps_n), alpha(alpha), beta(beta), lambda(lambda), iteration_count(0), vertices_max(vertices_max), age_max(age_max), k(k), gngu(gngu)
+GNG::GNG(int dim, double eps_w, double eps_n, double alpha, double beta, int lambda, int age_max, int vertices_max, double k, bool gngu): dim(dim), eps_w(eps_w), eps_n(eps_n), alpha(alpha), beta(beta), lambda(lambda), iteration_count(0), vertices_max(vertices_max), age_max(age_max), k(k), gngu(gngu), class_count(0)
 {
 }
 
@@ -28,7 +28,7 @@ void GNG::init(boost::numeric::ublas::vector<double> v1, boost::numeric::ublas::
 	graph[vertex_v2].weight = v2;
 	graph[vertex_v2].error = 0.;
 	graph[vertex_v2].utility = 0.;
-	GNGEdge edge_v1_v2 = boost::add_edge(vertex_v2, vertex_v2, graph).first;
+	GNGEdge edge_v1_v2 = boost::add_edge(vertex_v1, vertex_v2, graph).first;
 	graph[edge_v1_v2].age = 0;
 }
 
@@ -199,8 +199,67 @@ int GNG::getConnectedComponentsCount()
 	return com_count;
 }
 
+GNGGraph GNG::getGraph()
+{
+	return graph;
+}
+
+void GNG::classify()
+{
+	if(!class_count)
+	{
+		size_t index = 0;
+		BGL_FORALL_VERTICES(v, graph, GNGGraph)
+		{
+			boost::put(boost::vertex_index, graph, v, index++);
+		}
+		GNGComponentMap component;
+		boost::associative_property_map<GNGComponentMap> component_map(component);
+		class_count = connected_components(graph, component_map);
+		BGL_FORALL_VERTICES(v, graph, GNGGraph)
+		{
+			graph[v].class_id = boost::get(component_map, v);
+		}
+	}
+	else
+	{
+		size_t index = 0;
+		BGL_FORALL_VERTICES(v, graph, GNGGraph)
+		{
+			boost::put(boost::vertex_index, graph, v, index++);
+		}
+		GNGComponentMap component;
+		boost::associative_property_map<GNGComponentMap> component_map(component);
+		int class_num = connected_components(graph, component_map);
+		std::map<int, int> label_map;
+		BGL_FORALL_VERTICES(v, graph, GNGGraph)
+		{
+			if(graph[v].class_id != -1)
+			{
+				label_map[boost::get(component_map, v)] = graph[v].class_id;
+			}
+		}
+		if(class_count < class_num)
+		{
+			for(int i = class_count; i < class_num; i++)
+			{
+				label_map[i] = class_count++;
+			}
+		}
+		else
+		{
+			class_count = class_num;
+		}
+		BGL_FORALL_VERTICES(v, graph, GNGGraph)
+		{
+			graph[v].class_id = label_map[boost::get(component_map, v)];
+		}
+	}
+}
+
 void GNG::draw(cv::Mat &image)
 {
+	const cv::Scalar colors[6] = {cv::Scalar(255, 0, 0), cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255), cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255)};
 	GNGEdgeIterator edge_begin, edge_end;
 	boost::tie(edge_begin, edge_end) = boost::edges(graph);
 	for(GNGEdgeIterator i = edge_begin; i != edge_end; i++)
@@ -209,14 +268,12 @@ void GNG::draw(cv::Mat &image)
 		GNGVertex vertex_t = boost::target(*i, graph);
 		cv::Point p1(graph[vertex_s].weight[0], graph[vertex_s].weight[1]);
 		cv::Point p2(graph[vertex_t].weight[0], graph[vertex_t].weight[1]);
-		cv::circle(image, p1, 3, cv::Scalar(255, 0, 0));
-		cv::circle(image, p2, 3, cv::Scalar(255, 0, 0));
-		cv::line(image, p1, p2, cv::Scalar(0, 0, 255));
+		cv::line(image, p1, p2, colors[graph[vertex_s].class_id%6]);
 	}
 	GNGVertexIterator vertex_begin, vertex_end;
 	boost::tie(vertex_begin, vertex_end) = boost::vertices(graph);
 	for(GNGVertexIterator i = vertex_begin; i != vertex_end; i++)
 	{
-		cv::circle(image, cv::Point(graph[*i].weight[0], graph[*i].weight[1]), 3, cv::Scalar(255, 0, 0));
+		cv::circle(image, cv::Point(graph[*i].weight[0], graph[*i].weight[1]), 3, colors[graph[*i].class_id%6]);
 	}
 }
