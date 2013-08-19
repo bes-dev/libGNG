@@ -40,8 +40,9 @@ namespace ng
 		void addSignal(const boost::numeric::ublas::vector<double> &x);
 		void init(boost::numeric::ublas::vector<double> v1, boost::numeric::ublas::vector<double> v2);
 		void classify();
-		int getConnectedComponentsCount();
+		int getClassNum();
 		GNGGraph getGraph();
+		void clearGraph();
 	private:
 		int dim;
 		double eps_w, eps_n;

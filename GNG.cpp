@@ -184,17 +184,9 @@ void GNG::addSignal(const boost::numeric::ublas::vector<double> &x)
 	iteration_count++;
 }
 
-int GNG::getConnectedComponentsCount()
+int GNG::getClassNum()
 {
-	size_t index = 0;
-	BGL_FORALL_VERTICES(v, graph, GNGGraph)
-	{
-		boost::put(boost::vertex_index, graph, v, index++);
-	}
-	GNGComponentMap component;
-	boost::associative_property_map<GNGComponentMap> component_map(component);
-	int com_count = connected_components(graph, component_map);
-	return com_count;
+	return class_count;
 }
 
 GNGGraph GNG::getGraph()
@@ -204,53 +196,22 @@ GNGGraph GNG::getGraph()
 
 void GNG::classify()
 {
-	if(!class_count)
+	size_t index = 0;
+	BGL_FORALL_VERTICES(v, graph, GNGGraph)
 	{
-		size_t index = 0;
-		BGL_FORALL_VERTICES(v, graph, GNGGraph)
-		{
-			boost::put(boost::vertex_index, graph, v, index++);
-		}
-		GNGComponentMap component;
-		boost::associative_property_map<GNGComponentMap> component_map(component);
-		class_count = connected_components(graph, component_map);
-		BGL_FORALL_VERTICES(v, graph, GNGGraph)
-		{
-			graph[v].class_id = boost::get(component_map, v);
-		}
+		boost::put(boost::vertex_index, graph, v, index++);
 	}
-	else
+	GNGComponentMap component;
+	boost::associative_property_map<GNGComponentMap> component_map(component);
+	class_count = connected_components(graph, component_map);
+	BGL_FORALL_VERTICES(v, graph, GNGGraph)
 	{
-		size_t index = 0;
-		BGL_FORALL_VERTICES(v, graph, GNGGraph)
-		{
-			boost::put(boost::vertex_index, graph, v, index++);
-		}
-		GNGComponentMap component;
-		boost::associative_property_map<GNGComponentMap> component_map(component);
-		int class_num = connected_components(graph, component_map);
-		std::map<int, int> label_map;
-		BGL_FORALL_VERTICES(v, graph, GNGGraph)
-		{
-			if(graph[v].class_id != -1)
-			{
-				label_map[boost::get(component_map, v)] = graph[v].class_id;
-			}
-		}
-		if(class_count < class_num)
-		{
-			for(int i = class_count; i < class_num; i++)
-			{
-				label_map[i] = class_count++;
-			}
-		}
-		else
-		{
-			class_count = class_num;
-		}
-		BGL_FORALL_VERTICES(v, graph, GNGGraph)
-		{
-			graph[v].class_id = label_map[boost::get(component_map, v)];
-		}
+		graph[v].class_id = boost::get(component_map, v);
 	}
+}
+
+void GNG::clearGraph()
+{
+	graph.clear();
+	class_count = 0;
 }

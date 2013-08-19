@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 		//cv::waitKey(10);
 	}
 	model.classify();
-	std::cout<<"graph_connected_component_count: "<<model.getConnectedComponentsCount()<<"\n";
+	std::cout<<"graph_connected_component_count: "<<model.getClassNum()<<"\n";
 	cv::Mat img(480, 640, CV_32FC3);
 	//cv::rectangle(img, cv::Point(200, 200), cv::Point(400, 400), cv::Scalar(0, 255, 0));
 
