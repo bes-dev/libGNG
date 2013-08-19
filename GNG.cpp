@@ -215,3 +215,24 @@ void GNG::clearGraph()
 	graph.clear();
 	class_count = 0;
 }
+
+GNGVertexProperties GNG::getBestMatch(const boost::numeric::ublas::vector<double> &x)
+{
+	GNGVertexIterator s;
+	double error_max = std::numeric_limits<double>::min();
+	double dist_s = std::numeric_limits<double>::max();
+
+	GNGVertexIterator vertex_begin, vertex_end;
+	boost::tie(vertex_begin, vertex_end) = boost::vertices(graph);
+	for(GNGVertexIterator i = vertex_begin; i != vertex_end; i++)
+	{
+		double dist = ublas::norm_2(x-graph[*i].weight);
+		if(dist < dist_s)
+		{
+			s = i;
+			dist_s = dist;
+		}
+	}
+
+	return graph[*s];
+}

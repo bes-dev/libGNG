@@ -43,6 +43,7 @@ namespace ng
 		int getClassNum();
 		GNGGraph getGraph();
 		void clearGraph();
+		GNGVertexProperties getBestMatch(const boost::numeric::ublas::vector<double> &x);
 	private:
 		int dim;
 		double eps_w, eps_n;
