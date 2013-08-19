@@ -5,11 +5,9 @@
 #include <limits>
 #include <boost/foreach.hpp>
 #include <boost/utility.hpp> 
-#include <boost/graph/graphviz.hpp>
 #include <boost/graph/connected_components.hpp>
 #include <boost/property_map/property_map.hpp>
 #include <boost/graph/iteration_macros.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 using namespace ng;
 using namespace boost::numeric;
@@ -254,26 +252,5 @@ void GNG::classify()
 		{
 			graph[v].class_id = label_map[boost::get(component_map, v)];
 		}
-	}
-}
-
-void GNG::draw(cv::Mat &image)
-{
-	const cv::Scalar colors[6] = {cv::Scalar(255, 0, 0), cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255), cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255)};
-	GNGEdgeIterator edge_begin, edge_end;
-	boost::tie(edge_begin, edge_end) = boost::edges(graph);
-	for(GNGEdgeIterator i = edge_begin; i != edge_end; i++)
-	{
-		GNGVertex vertex_s = boost::source(*i, graph);
-		GNGVertex vertex_t = boost::target(*i, graph);
-		cv::Point p1(graph[vertex_s].weight[0], graph[vertex_s].weight[1]);
-		cv::Point p2(graph[vertex_t].weight[0], graph[vertex_t].weight[1]);
-		cv::line(image, p1, p2, colors[graph[vertex_s].class_id%6]);
-	}
-	GNGVertexIterator vertex_begin, vertex_end;
-	boost::tie(vertex_begin, vertex_end) = boost::vertices(graph);
-	for(GNGVertexIterator i = vertex_begin; i != vertex_end; i++)
-	{
-		cv::circle(image, cv::Point(graph[*i].weight[0], graph[*i].weight[1]), 3, colors[graph[*i].class_id%6]);
 	}
 }

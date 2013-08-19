@@ -42,7 +42,6 @@ namespace ng
 		void classify();
 		int getConnectedComponentsCount();
 		GNGGraph getGraph();
-		void draw(cv::Mat &image);
 	private:
 		int dim;
 		double eps_w, eps_n;
